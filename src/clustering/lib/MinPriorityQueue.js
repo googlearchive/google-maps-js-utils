@@ -25,13 +25,13 @@
 function MinPriorityQueue(opt_elements) {
   /**
    * The heap.
-   * @type {!Array.<PriorityQueueNode>}
+   * @private {!Array.<PriorityQueueNode>}
    */
   this.elements_ = opt_elements || [];
 
   /**
    * The number of elements in the heap.
-   * @type {number}
+   * @private {number}
    */
   this.size_ = this.elements_.length;
 
