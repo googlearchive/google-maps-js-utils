@@ -38,6 +38,12 @@ ClusterAlgorithm.prototype.addItems = function(items) {};
 ClusterAlgorithm.prototype.clearItems = function() {};
 
 /**
+ * Returns an array of the items currently handled by the clustering algorithm.
+ * @return {!Array.<!ClusterItem>}
+ */
+ClusterAlgorithm.prototype.getItems = function() {};
+
+/**
  * Remove a ClusterItem from the items to be clustered, if present.
  * @param {ClusterItem} item
  */
