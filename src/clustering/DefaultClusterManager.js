@@ -21,23 +21,27 @@
  * A simple cluster manager implementation. By default, uses a hierarchical
  * clusterer algorithm and the DefaultClusterRenderer for rendering.
  * @param {!google.maps.Map} map
+ * @param {ClusterRenderer=} opt_renderer
+ * @param {ClusterAlgorithm=} opt_algorithm
  * @constructor
  */
-function DefaultClusterManager(map) {
+function DefaultClusterManager(map, opt_renderer, opt_algorithm) {
   /**
    * @private {!google.maps.Map}
    */
   this.map_ = map;
 
+  var algo = opt_algorithm ? opt_algorithm : new HierarchicalClusterer();
   /**
    * @private {!ClusterAlgorithm}
    */
-  this.algorithm_ = new HierarchicalClusterer();
+  this.algorithm_ = algo;
 
+  var renderer = opt_renderer ? opt_renderer : new DefaultClusterRenderer(map);
   /**
    * @private {!ClusterRenderer}
    */
-  this.renderer_ = new DefaultClusterRenderer(map);
+  this.renderer_ = renderer;
 }
 
 /**
