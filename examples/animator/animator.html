@@ -30,15 +30,13 @@ function initialize() {
     center: { lat: 20, lng: -160 },
     zoom: 3
   });
-  var timeDiv = document.getElementById('current-time');
-  map.controls[google.maps.ControlPosition.RIGHT_TOP].push(timeDiv);
   map.data.setStyle(styler);
   // use addGeoJson (which is synchronous) to ensure map.data is full of
   // features before instantiating animation.  Earthquakes data is from
   // earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geojsonp
   $.getJSON('./earthquakes.json', function(json) {
     map.data.addGeoJson(json);
-    animator = new Animator(map.data, {
+    animator = new Animator(map, {
       steps: 1024, // smoothness
       duration: 15, // seconds of animation
       repeat: true
@@ -68,6 +66,5 @@ function styler(feature) {
   </head>
   <body id="map-container">
     <div id="map-canvas"></div>
-    <div id="current-time"></div>
   </body>
 </html>
