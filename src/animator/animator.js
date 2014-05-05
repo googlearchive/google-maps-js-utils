@@ -10,7 +10,7 @@
 
 /**
  * @constructor
- * @param {google.maps.Data} data with point features you want to animate.
+ * @param {google.maps.Map} map features already loaded in map.data.
  * @param {?Object} options overriding defaults.
  */
 function Animator(map, options) {
@@ -77,46 +77,39 @@ function Animator(map, options) {
   * id of the div element the time and slider will be displayed in.
   * @type {Object}
   */
-  this.UI_DIV = 'data_animator_ui'
+  this.UI_DIV = 'data_animator_ui';
 
-  /**
-  * Overrides default values with user specified otions, copies the data to
-  * the features array, and sets the default min/max times.
-  */
-  this.init = function() {
-    // override defaults with provided options
-    var keys = ['timeProperty', 'steps', 'duration', 'additive', 'repeat'];
-    for (var key in options) {
-      if (keys.indexOf(key) > -1) {
-        this[key] = options[key];
-      }
+  // override defaults with user specified options.
+  var keys = ['timeProperty', 'steps', 'duration', 'additive', 'repeat'];
+  for (var key in options) {
+    if (keys.indexOf(key) > -1) {
+      this[key] = options[key];
     }
-    // set min/max time and copy features from maps.data to features array.
-    var that = this;
-    this.map.data.forEach(function(feature) {
-      var time = parseInt(feature.getProperty(that.timeProperty));
-      if (that.startTime) {
-        that.startTime = Math.min(that.startTime, time);
-      } else {
-        that.startTime = time;
-      }
-      that.endTime = Math.max(that.endTime, time);
-      that.features.push(feature);
-    });
-    // sort features by time
-    this.features.sort(function(a, b) {
-      var prop = that.timeProperty;
-      if (a.getProperty(prop) > b.getProperty(prop)) {
-        return 1;
-      }
-      if (a.getProperty(prop) < b.getProperty(prop)) {
-        return -1;
-      }
-      return 0;
-    });
-    this.enableControls();
-  };
-  this.init();
+  }
+  // set min/max time and copy features from maps.data to features array.
+  var that = this;
+  this.map.data.forEach(function(feature) {
+    var time = parseInt(feature.getProperty(that.timeProperty));
+    if (that.startTime) {
+      that.startTime = Math.min(that.startTime, time);
+    } else {
+      that.startTime = time;
+    }
+    that.endTime = Math.max(that.endTime, time);
+    that.features.push(feature);
+  });
+  // sort features by time
+  this.features.sort(function(a, b) {
+    var prop = that.timeProperty;
+    if (a.getProperty(prop) > b.getProperty(prop)) {
+      return 1;
+    }
+    if (a.getProperty(prop) < b.getProperty(prop)) {
+      return -1;
+    }
+    return 0;
+  });
+  this.enableControls();
 }
 
 /**
@@ -180,11 +173,11 @@ Animator.prototype.start = function() {
  */
 // TODO(jlivni): add time slider.
 Animator.prototype.enableControls = function() {
-  var div = document.getElementById(this.UI_DIV)
+  var div = document.getElementById(this.UI_DIV);
   if (!div) {
     div = document.createElement('div');
     div.setAttribute('id', this.UI_DIV);
     document.body.appendChild(div);
     this.map.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
   }
-}
+};
