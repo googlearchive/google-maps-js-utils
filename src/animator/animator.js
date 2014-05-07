@@ -34,7 +34,7 @@ function Animator(map, options) {
   * Seconds the animation should last.
   * @type {number}
   */
-  this.duration = 30; // seconds the aninmation should last.
+  this.duration = 30000; // ms the aninmation should last.
 
   /**
   * Number of steps in advance features should fade in (or out).
@@ -153,7 +153,7 @@ Animator.prototype.animate = function() {
   var that = this;
   this.timeout = window.setTimeout(function() {
     that.animate();
-  }, that.duration / that.steps * 1000);
+  }, that.duration / that.steps);
 };
 
 /**

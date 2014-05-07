@@ -38,7 +38,7 @@ function initialize() {
     map.data.addGeoJson(json);
     animator = new Animator(map, {
       steps: 1024, // smoothness
-      duration: 15, // seconds of animation
+      duration: 15000, // ms of animation
       repeat: true
     });
     animator.start();
