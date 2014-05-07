@@ -124,7 +124,7 @@ function Animator(map, options) {
  */
 Animator.prototype.animate = function() {
   var totalTime = this.endTime - this.startTime;
-  var futureTime = Math.ceil(totalTime / this.steps) + this.currentTime;
+  this.futureTime_ = Math.ceil(totalTime / this.steps) + this.currentTime;
   if (this.index >= this.features_.length - 1) {
     // clear existing timeout.
     this.stop();
@@ -137,7 +137,7 @@ Animator.prototype.animate = function() {
     var feature = this.features_[i];
     var time = parseInt(feature.getProperty(this.timeProperty));
     this.currentTime = time;
-    if (time <= futureTime) {
+    if (time <= this.futureTime_) {
       this.map.data.add(feature);
     } else {
       // TODO(jlivni): Break out into method for updating details/slider.
