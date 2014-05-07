@@ -18,6 +18,8 @@ function Animator(map, options) {
 
   /**
   * Number of steps for the animation (higher # is smoother).
+  * TODO(jlivni): Optimize for max smoothness with requestAnimationFrame
+  * if user hasn't specified discrete steps for their animation.
   * @type {number}
   */
   this.steps = 500; // granularity; change this based on # of features
@@ -56,26 +58,27 @@ function Animator(map, options) {
 
   /**
   * Start time in UTC ms (initialized to minimum in dataset).
-  * @type {boolean}
+  * @type {number}
   */
   this.startTime = null;
 
   /**
   * End time in UTC ms (initialized to max in dataset).
-  * @type {boolean}
+  * @type {number}
   */
   this.endTime = null;
 
   /**
   * Array of features in the data.
-  * @type {Object}
+  * @private
+  * @type {Array}
   */
-  this.features = [];
+  this.features_ = [];
 
   /**
-  * @const
   * id of the div element the time and slider will be displayed in.
-  * @type {Object}
+  * @constant
+  * @type {string}
   */
   this.UI_DIV = 'data_animator_ui';
 
@@ -89,17 +92,21 @@ function Animator(map, options) {
   // set min/max time and copy features from maps.data to features array.
   var that = this;
   this.map.data.forEach(function(feature) {
-    var time = parseInt(feature.getProperty(that.timeProperty));
-    if (that.startTime) {
-      that.startTime = Math.min(that.startTime, time);
-    } else {
-      that.startTime = time;
+    var timeProp = feature.getProperty(that.timeProperty);
+    if (timeProp && parseInt(timeProp)) {
+      var time = parseInt(feature.getProperty(that.timeProperty));
+      if (that.startTime) {
+        that.startTime = Math.min(that.startTime, time);
+      } else {
+        that.startTime = time;
+      }
+      that.endTime = Math.max(that.endTime, time);
+      that.features_.push(feature);
     }
-    that.endTime = Math.max(that.endTime, time);
-    that.features.push(feature);
+    // TODO(jlivni): Push to some kind of debug or errors array.
   });
   // sort features by time
-  this.features.sort(function(a, b) {
+  this.features_.sort(function(a, b) {
     var prop = that.timeProperty;
     if (a.getProperty(prop) > b.getProperty(prop)) {
       return 1;
@@ -117,8 +124,8 @@ function Animator(map, options) {
  */
 Animator.prototype.animate = function() {
   var totalTime = this.endTime - this.startTime;
-  futureTime = Math.ceil(totalTime / this.steps) + this.currentTime;
-  if (this.index >= this.features.length - 1) {
+  var futureTime = Math.ceil(totalTime / this.steps) + this.currentTime;
+  if (this.index >= this.features_.length - 1) {
     // clear existing timeout.
     this.stop();
     if (this.repeat) {
@@ -126,14 +133,16 @@ Animator.prototype.animate = function() {
       this.start();
     }
   }
-  for (var i = this.index; i < this.features.length; i++) {
-    var feature = this.features[i];
+  for (var i = this.index; i < this.features_.length; i++) {
+    var feature = this.features_[i];
     var time = parseInt(feature.getProperty(this.timeProperty));
     this.currentTime = time;
     if (time <= futureTime) {
       this.map.data.add(feature);
     } else {
       // TODO(jlivni): Break out into method for updating details/slider.
+      // TODO(jlivni): consider a user provided callback function, or another
+      // way to provide more control than just start/stop.
       var d = new Date(0);
       d.setUTCMilliseconds(time);
       document.getElementById(this.UI_DIV).innerHTML = d.toLocaleString();
