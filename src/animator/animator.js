@@ -123,38 +123,39 @@ function Animator(map, options) {
  * Move a step forward in the animation.
  */
 Animator.prototype.animate = function() {
-  var totalTime = this.endTime - this.startTime;
-  this.futureTime_ = Math.ceil(totalTime / this.steps) + this.currentTime;
-  if (this.index >= this.features_.length - 1) {
-    // clear existing timeout.
-    this.stop();
-    if (this.repeat) {
-      // restart animation.
-      this.start();
-    }
-  }
+  var animationProgress = (new Date().getTime() - this.animationStart) / this.duration;
+  var currentTime = this.startTime + animationProgress * (this.endTime - this.startTime);
+
+  // display currentTime in control
+  // TODO(jlivni): Break out into method for updating details/slider.
+  var d = new Date(0);
+  d.setUTCMilliseconds(currentTime);
+  document.getElementById(this.UI_DIV).innerHTML = d.toLocaleString();
+
   for (var i = this.index; i < this.features_.length; i++) {
     var feature = this.features_[i];
     var time = parseInt(feature.getProperty(this.timeProperty));
     this.currentTime = time;
-    if (time <= this.futureTime_) {
+    // if feature.time < currentTime, add to map.Data
+    if (time < currentTime) {
       this.map.data.add(feature);
     } else {
-      // TODO(jlivni): Break out into method for updating details/slider.
-      // TODO(jlivni): consider a user provided callback function, or another
-      // way to provide more control than just start/stop.
-      var d = new Date(0);
-      d.setUTCMilliseconds(time);
-      document.getElementById(this.UI_DIV).innerHTML = d.toLocaleString();
       break;
     }
   }
   this.index = i;
-  var that = this;
-  this.timeout = window.setTimeout(function() {
-    that.animate();
-  }, that.duration / that.steps);
-};
+
+  if (animationProgress < 1) {
+    var that = this;
+    window.requestAnimationFrame(function() {
+      that.animate();
+    });
+  } else {
+    if (this.repeat) {
+      this.start();
+    }
+  }
+}
 
 /**
  * Stop the animation.
@@ -167,7 +168,8 @@ Animator.prototype.stop = function() {
  * Remove everything from map.data and prepare for adding back in.
  */
 Animator.prototype.start = function() {
-  this.currentTime = this.startTime; //TODO (accept other startTime, via slider)
+  //TODO (accept some kind of index into the features, via slider)
+  this.animationStart = new Date().getTime();
   this.index = 0;
   // remove all features from map.data
   var that = this;
