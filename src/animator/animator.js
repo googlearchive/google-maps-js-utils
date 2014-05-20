@@ -18,14 +18,6 @@ function Animator(map, options) {
   this.map_ = map;
 
   /**
-   * Number of steps for the animation (higher # is smoother).
-   * TODO(jlivni): Optimize for max smoothness with requestAnimationFrame
-   * if user hasn't specified discrete steps for their animation.
-   * @type {number}
-   */
-  this.steps = 500; // granularity; change this based on # of features
-
-  /**
    * The key of the property that contains the time (in ms since epoch).
    * @type {string}
    */
