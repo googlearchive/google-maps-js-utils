@@ -99,8 +99,10 @@ function Animator(map, options) {
 
 /**
  * Move a step forward in the animation.
+ * @private
+ * TODO(jlivni): Instead of animate, have devs call start/stop and pause/resume.
  */
-Animator.prototype.animate = function() {
+Animator.prototype.animate_ = function() {
   var animationProgress = (new Date().getTime() - this.animationStart) / this.duration_;
   if (this.steps_) {
     var animationProgress = Math.floor(animationProgress * this.steps_) / this.steps_;
@@ -128,7 +130,7 @@ Animator.prototype.animate = function() {
   if (animationProgress < 1) {
     var that = this;
     window.requestAnimationFrame(function() {
-      that.animate();
+      that.animate_();
     });
   } else {
     if (this.repeat_) {
@@ -156,7 +158,7 @@ Animator.prototype.start = function() {
   this.map_.data.forEach(function(feature) {
     that.map_.data.remove(feature);
   });
-  this.animate();
+  this.animate_();
 };
 
 /**
