@@ -2,6 +2,7 @@
  * @fileoverview Animates features in map.data over time.
  * After loading features into google.maps.Data, you can instantiate a
  * new Animator, passing in a reference to your map and various options.
+ * Note that updates to map.data won't be reflected in the animator.
  *
  * usage:  var animator = new Animator(map); animator.start();.
  *
@@ -28,20 +29,13 @@ function Animator(map, options) {
    * The key of the property that contains the time (in ms since epoch).
    * @type {string}
    */
-  this.timeProperty = 'time';
+  this.timeProperty_ = 'time';
 
   /**
-   * Seconds the animation should last.
+   * Milliseconds the animation should last.
    * @type {number}
    */
   this.duration = 30000; // ms the aninmation should last.
-
-  /**
-   * Number of steps in advance features should fade in (or out).
-   * @type {number}
-   */
-  //TODO(jlivni): implement this.
-  this.fadeSteps = 3;
 
   /**
    * Continuously replay the animation.
@@ -50,28 +44,21 @@ function Animator(map, options) {
   this.repeat = true;
 
   /**
-   * Don't remove features if true.
-   * @type {boolean}
-   */
-  //TODO(jlivni): implement this.
-  this.additive = true;
-
-  /**
    * Start time in UTC ms (initialized to minimum in dataset).
-   * @type {number}
+   * @type {number|null}
    */
   this.startTime = null;
 
   /**
    * End time in UTC ms (initialized to max in dataset).
-   * @type {number}
+   * @type {number|null}
    */
   this.endTime = null;
 
   /**
    * Array of features in the data.
    * @private
-   * @type {Array}
+   * @type {Array.<google.maps.Data.Feature>}
    */
   this.features_ = [];
 
@@ -83,7 +70,7 @@ function Animator(map, options) {
   this.UI_DIV = 'data_animator_ui';
 
   // override defaults with user specified options.
-  var keys = ['timeProperty', 'steps', 'duration', 'additive', 'repeat'];
+  var keys = ['timeProperty_', 'steps', 'duration', 'additive', 'repeat'];
   for (var key in options) {
     if (keys.indexOf(key) > -1) {
       this[key] = options[key];
@@ -92,9 +79,9 @@ function Animator(map, options) {
   // set min/max time and copy features from maps.data to features array.
   var that = this;
   this.map_.data.forEach(function(feature) {
-    var timeProp = feature.getProperty(that.timeProperty);
+    var timeProp = feature.getProperty(that.timeProperty_);
     if (timeProp && parseInt(timeProp)) {
-      var time = parseInt(feature.getProperty(that.timeProperty));
+      var time = parseInt(feature.getProperty(that.timeProperty_));
       if (that.startTime) {
         that.startTime = Math.min(that.startTime, time);
       } else {
@@ -107,14 +94,8 @@ function Animator(map, options) {
   });
   // sort features by time
   this.features_.sort(function(a, b) {
-    var prop = that.timeProperty;
-    if (a.getProperty(prop) > b.getProperty(prop)) {
-      return 1;
-    }
-    if (a.getProperty(prop) < b.getProperty(prop)) {
-      return -1;
-    }
-    return 0;
+    var prop = that.timeProperty_;
+    return a.getProperty(prop) - b.getProperty(prop);
   });
   this.enableControls();
 }
@@ -123,21 +104,21 @@ function Animator(map, options) {
  * Move a step forward in the animation.
  */
 Animator.prototype.animate = function() {
-  var animationProgress = (new Date().getTime() - this.animationStart) / this.duration;
   if (this.steps_) {
     var animationProgress = Math.floor(animationProgress * this.steps) / this.steps;
+  } else {
+    var animationProgress = (new Date().getTime() - this.animationStart) / this.duration;
   }
   var currentTime = this.startTime + animationProgress * (this.endTime - this.startTime);
 
   // display currentTime in control
   // TODO(jlivni): Break out into method for updating details/slider.
-  var d = new Date(0);
-  d.setUTCMilliseconds(currentTime);
-  document.getElementById(this.UI_DIV).innerHTML = d.toLocaleString();
+  var timeToDisplay = new Date(currentTime).toLocaleString();
+  document.getElementById(this.UI_DIV).innerHTML = timeToDisplay;
 
   for (var i = this.index; i < this.features_.length; i++) {
     var feature = this.features_[i];
-    var time = parseInt(feature.getProperty(this.timeProperty));
+    var time = parseInt(feature.getProperty(this.timeProperty_), 10);
     this.currentTime = time;
     // if feature.time < currentTime, add to map.Data
     if (time < currentTime) {
@@ -158,7 +139,7 @@ Animator.prototype.animate = function() {
       this.start();
     }
   }
-}
+};
 
 /**
  * Stop the animation.
