@@ -14,72 +14,72 @@
  * @param {?Object} options overriding defaults.
  */
 function Animator(map, options) {
-  this.map = map;
+  this.map_ = map;
 
   /**
-  * Number of steps for the animation (higher # is smoother).
-  * TODO(jlivni): Optimize for max smoothness with requestAnimationFrame
-  * if user hasn't specified discrete steps for their animation.
-  * @type {number}
-  */
+   * Number of steps for the animation (higher # is smoother).
+   * TODO(jlivni): Optimize for max smoothness with requestAnimationFrame
+   * if user hasn't specified discrete steps for their animation.
+   * @type {number}
+   */
   this.steps = 500; // granularity; change this based on # of features
 
   /**
-  * The key of the property that contains the time (in ms since epoch).
-  * @type {string}
-  */
+   * The key of the property that contains the time (in ms since epoch).
+   * @type {string}
+   */
   this.timeProperty = 'time';
 
   /**
-  * Seconds the animation should last.
-  * @type {number}
-  */
+   * Seconds the animation should last.
+   * @type {number}
+   */
   this.duration = 30000; // ms the aninmation should last.
 
   /**
-  * Number of steps in advance features should fade in (or out).
-  * @type {number}
-  */
+   * Number of steps in advance features should fade in (or out).
+   * @type {number}
+   */
   //TODO(jlivni): implement this.
   this.fadeSteps = 3;
 
   /**
-  * Continuously replay the animation.
-  * @type {boolean}
-  */
+   * Continuously replay the animation.
+   * @type {boolean}
+   */
   this.repeat = true;
 
   /**
-  * Don't remove features if true.
-  * @type {boolean}
-  */
+   * Don't remove features if true.
+   * @type {boolean}
+   */
   //TODO(jlivni): implement this.
   this.additive = true;
 
   /**
-  * Start time in UTC ms (initialized to minimum in dataset).
-  * @type {number}
-  */
+   * Start time in UTC ms (initialized to minimum in dataset).
+   * @type {number}
+   */
   this.startTime = null;
 
   /**
-  * End time in UTC ms (initialized to max in dataset).
-  * @type {number}
-  */
+   * End time in UTC ms (initialized to max in dataset).
+   * @type {number}
+   */
   this.endTime = null;
 
   /**
-  * Array of features in the data.
-  * @private
-  * @type {Array}
-  */
+   * Array of features in the data.
+   * @private
+   * @type {Array}
+   */
   this.features_ = [];
 
   /**
-  * id of the div element the time and slider will be displayed in.
-  * @constant
-  * @type {string}
-  */
+   * id of the div element the time and slider will be displayed in.
+   * @constant
+   * @type {string}
+   */
   this.UI_DIV = 'data_animator_ui';
 
   // override defaults with user specified options.
@@ -91,7 +91,7 @@ function Animator(map, options) {
   }
   // set min/max time and copy features from maps.data to features array.
   var that = this;
-  this.map.data.forEach(function(feature) {
+  this.map_.data.forEach(function(feature) {
     var timeProp = feature.getProperty(that.timeProperty);
     if (timeProp && parseInt(timeProp)) {
       var time = parseInt(feature.getProperty(that.timeProperty));
@@ -138,7 +138,7 @@ Animator.prototype.animate = function() {
     this.currentTime = time;
     // if feature.time < currentTime, add to map.Data
     if (time < currentTime) {
-      this.map.data.add(feature);
+      this.map_.data.add(feature);
     } else {
       break;
     }
@@ -173,8 +173,8 @@ Animator.prototype.start = function() {
   this.index = 0;
   // remove all features from map.data
   var that = this;
-  this.map.data.forEach(function(feature) {
-    that.map.data.remove(feature);
+  this.map_.data.forEach(function(feature) {
+    that.map_.data.remove(feature);
   });
   this.animate();
 };
@@ -189,6 +189,6 @@ Animator.prototype.enableControls = function() {
     div = document.createElement('div');
     div.setAttribute('id', this.UI_DIV);
     document.body.appendChild(div);
-    this.map.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
+    this.map_.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
   }
 };
