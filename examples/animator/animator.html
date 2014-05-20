@@ -37,7 +37,7 @@ function initialize() {
   $.getJSON('./earthquakes.json', function(json) {
     map.data.addGeoJson(json);
     animator = new Animator(map, {
-      steps: 1024, // smoothness
+      steps: 30, // Less smooth than leaving this as default.
       duration: 15000, // ms of animation
       repeat: true
     });

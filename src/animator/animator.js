@@ -124,6 +124,9 @@ function Animator(map, options) {
  */
 Animator.prototype.animate = function() {
   var animationProgress = (new Date().getTime() - this.animationStart) / this.duration;
+  if (this.steps_) {
+    var animationProgress = Math.floor(animationProgress * this.steps) / this.steps;
+  }
   var currentTime = this.startTime + animationProgress * (this.endTime - this.startTime);
 
   // display currentTime in control
