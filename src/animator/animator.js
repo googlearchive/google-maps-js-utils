@@ -19,33 +19,38 @@ function Animator(map, options) {
 
   /**
    * The key of the property that contains the time (in ms since epoch).
+   * @private
    * @type {string}
    */
   this.timeProperty_ = 'time';
 
   /**
    * Milliseconds the animation should last.
+   * @private
    * @type {number}
    */
-  this.duration = 30000; // ms the aninmation should last.
+  this.duration_ = 30000; // ms the aninmation should last.
 
   /**
    * Continuously replay the animation.
+   * @private
    * @type {boolean}
    */
-  this.repeat = true;
+  this.repeat_ = true;
 
   /**
    * Start time in UTC ms (initialized to minimum in dataset).
+   * @private
    * @type {number|null}
    */
-  this.startTime = null;
+  this.startTime_ = null;
 
   /**
    * End time in UTC ms (initialized to max in dataset).
+   * @private
    * @type {number|null}
    */
-  this.endTime = null;
+  this.endTime_ = null;
 
   /**
    * Array of features in the data.
@@ -62,10 +67,10 @@ function Animator(map, options) {
   this.UI_DIV = 'data_animator_ui';
 
   // override defaults with user specified options.
-  var keys = ['timeProperty_', 'steps', 'duration', 'additive', 'repeat'];
+  var keys = ['timeProperty', 'steps', 'duration', 'repeat'];
   for (var key in options) {
     if (keys.indexOf(key) > -1) {
-      this[key] = options[key];
+      this[key + '_'] = options[key];
     }
   }
   // set min/max time and copy features from maps.data to features array.
@@ -74,12 +79,12 @@ function Animator(map, options) {
     var timeProp = feature.getProperty(that.timeProperty_);
     if (timeProp && parseInt(timeProp)) {
       var time = parseInt(feature.getProperty(that.timeProperty_));
-      if (that.startTime) {
-        that.startTime = Math.min(that.startTime, time);
+      if (that.startTime_) {
+        that.startTime_ = Math.min(that.startTime_, time);
       } else {
-        that.startTime = time;
+        that.startTime_ = time;
       }
-      that.endTime = Math.max(that.endTime, time);
+      that.endTime_ = Math.max(that.endTime_, time);
       that.features_.push(feature);
     }
     // TODO(jlivni): Push to some kind of debug or errors array.
@@ -96,12 +101,11 @@ function Animator(map, options) {
  * Move a step forward in the animation.
  */
 Animator.prototype.animate = function() {
+  var animationProgress = (new Date().getTime() - this.animationStart) / this.duration_;
   if (this.steps_) {
-    var animationProgress = Math.floor(animationProgress * this.steps) / this.steps;
-  } else {
-    var animationProgress = (new Date().getTime() - this.animationStart) / this.duration;
+    var animationProgress = Math.floor(animationProgress * this.steps_) / this.steps_;
   }
-  var currentTime = this.startTime + animationProgress * (this.endTime - this.startTime);
+  var currentTime = this.startTime_ + animationProgress * (this.endTime_ - this.startTime_);
 
   // display currentTime in control
   // TODO(jlivni): Break out into method for updating details/slider.
@@ -127,7 +131,7 @@ Animator.prototype.animate = function() {
       that.animate();
     });
   } else {
-    if (this.repeat) {
+    if (this.repeat_) {
       this.start();
     }
   }
